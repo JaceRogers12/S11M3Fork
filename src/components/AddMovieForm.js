@@ -1,56 +1,49 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import React, {useState, useEffect} from "react";
+import {useNavigate, Link} from "react-router-dom";
+import axios from "axios";
 
-import axios from 'axios';
+const randomNumber = () => {
+    return String(Math.floor(Math.random()*9999))+"A"
+}
 
-const EditMovieForm = (props) => {
-  const navigate = useNavigate();
-  const {id} = useParams();
-
-  const { setMovies } = props;
-  const [movie, setMovie] = useState({
+const cleanSlateMovie = {
     title: "",
     director: "",
     genre: "",
     metascore: 0,
-    description: ""
-  });
+    description: "",
+    id: 0
+    }
 
-  useEffect(() => {
-    axios.get(`http://localhost:9000/api/movies/${id}`)
-      .then(res => setMovie(res.data))
-      .catch(res => console.log(res))
-  }, [])
+function AddMovieForm (props) {
+    const [newMovie, setNewMovie] = useState(cleanSlateMovie);
+    const navigate = useNavigate();
+    const {setMovies} = props;
 
-  const handleChange = (e) => {
-    setMovie({
-      ...movie,
-      [e.target.name]: e.target.value
-    });
-  }
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        const postedMovie = {...newMovie, id: randomNumber()};
+        console.log(postedMovie)
+        axios.post(`http://localhost:9000/api/movies`, postedMovie)
+            .then(res => {
+                setMovies(res.data);
+                setNewMovie(cleanSlateMovie);
+                navigate("/movies");
+            })
+            .catch(res => console.log(res))
+    };
+    const handleChange = (event) => {
+        setNewMovie({...newMovie, [event.target.name]: event.target.value})
+    };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    axios.put(`http://localhost:9000/api/movies/${id}`, movie)
-      .then(res => {
-        setMovies(res.data);
-        navigate(`/movies/${id}`)
-      })
-      .catch(res => console.log(res))
-    // Make your put request here
-    // On success, set the updated movies in state
-    // and also navigate the app to the updated movie path
-  }
+    const { title, director, genre, metascore, description } = newMovie;
 
-  const { title, director, genre, metascore, description } = movie;
-
-  return (
+    return(
     <div className="col">
       <div className="modal-content">
         <form onSubmit={handleSubmit}>
           <div className="modal-header">
-            <h4 className="modal-title">Editing <strong>{movie.title}</strong></h4>
+            <h4 className="modal-title">Add a Movie</h4>
           </div>
           <div className="modal-body">
             <div className="form-group">
@@ -77,11 +70,12 @@ const EditMovieForm = (props) => {
           </div>
           <div className="modal-footer">
             <input type="submit" className="btn btn-info" value="Save" />
-            <Link to={`/movies/${id}`}><input type="button" className="btn btn-default" value="Cancel" /></Link>
+            <Link to={`/movies`}><input type="button" className="btn btn-default" value="Cancel" /></Link>
           </div>
         </form>
       </div>
-    </div>);
-}
+    </div>
+    )
+};
 
-export default EditMovieForm;
+export default AddMovieForm;

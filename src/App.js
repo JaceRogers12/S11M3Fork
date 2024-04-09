@@ -4,6 +4,7 @@ import { Route, Routes, Navigate, useNavigate } from "react-router-dom";
 import MovieList from './components/MovieList';
 import Movie from './components/Movie';
 import EditMovieForm from "./components/EditMovieForm.js";
+import AddMovieForm from "./components/AddMovieForm.js";
 
 import MovieHeader from './components/MovieHeader';
 
@@ -30,7 +31,6 @@ const App = (props) => {
 
     axios.delete(`http://localhost:9000/api/movies/${id}`)
       .then(res => {
-        console.log(res);
         setMovies(res.data);
         navigate("/movies");
       })
@@ -57,6 +57,8 @@ const App = (props) => {
           <FavoriteMovieList favoriteMovies={favoriteMovies} />
 
           <Routes>
+            <Route path="movies/add" element={<AddMovieForm setMovies={setMovies} />} />
+
             <Route path="movies/edit/:id" element={<EditMovieForm setMovies={setMovies} />}/>
 
             <Route path="movies/:id" element={<Movie deleteMovie={deleteMovie} />}/>
